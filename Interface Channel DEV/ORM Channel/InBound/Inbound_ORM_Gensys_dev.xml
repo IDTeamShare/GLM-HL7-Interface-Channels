@@ -1,0 +1,1049 @@
+<channel version="3.9.0">
+  <id>f839015a-0d11-4f67-a749-4c056541e0ef</id>
+  <nextMetaDataId>5</nextMetaDataId>
+  <name>Inbound_ORM_Gensys_dev</name>
+  <description></description>
+  <revision>95</revision>
+  <sourceConnector version="3.9.0">
+    <metaDataId>0</metaDataId>
+    <name>sourceConnector</name>
+    <properties class="com.mirth.connect.connectors.file.FileReceiverProperties" version="3.9.0">
+      <pluginProperties/>
+      <pollConnectorProperties version="3.9.0">
+        <pollingType>INTERVAL</pollingType>
+        <pollOnStart>false</pollOnStart>
+        <pollingFrequency>5000</pollingFrequency>
+        <pollingHour>0</pollingHour>
+        <pollingMinute>0</pollingMinute>
+        <cronJobs/>
+        <pollConnectorPropertiesAdvanced>
+          <weekly>true</weekly>
+          <inactiveDays>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+          </inactiveDays>
+          <dayOfMonth>1</dayOfMonth>
+          <allDay>true</allDay>
+          <startingHour>8</startingHour>
+          <startingMinute>0</startingMinute>
+          <endingHour>17</endingHour>
+          <endingMinute>0</endingMinute>
+        </pollConnectorPropertiesAdvanced>
+      </pollConnectorProperties>
+      <sourceConnectorProperties version="3.9.0">
+        <responseVariable>Auto-generate (Destinations completed)</responseVariable>
+        <respondAfterProcessing>true</respondAfterProcessing>
+        <processBatch>false</processBatch>
+        <firstResponse>false</firstResponse>
+        <processingThreads>1</processingThreads>
+        <resourceIds class="linked-hash-map">
+          <entry>
+            <string>Default Resource</string>
+            <string>[Default Resource]</string>
+          </entry>
+        </resourceIds>
+        <queueBufferSize>1000</queueBufferSize>
+      </sourceConnectorProperties>
+      <scheme>FILE</scheme>
+      <host>E:/ORMInbound</host>
+      <fileFilter>*</fileFilter>
+      <regex>false</regex>
+      <directoryRecursion>false</directoryRecursion>
+      <ignoreDot>false</ignoreDot>
+      <anonymous>true</anonymous>
+      <username>anonymous</username>
+      <password>anonymous</password>
+      <timeout>10000</timeout>
+      <secure>true</secure>
+      <passive>true</passive>
+      <validateConnection>true</validateConnection>
+      <afterProcessingAction>MOVE</afterProcessingAction>
+      <moveToDirectory>E:/MessageStatus/Archive</moveToDirectory>
+      <moveToFileName></moveToFileName>
+      <errorReadingAction>NONE</errorReadingAction>
+      <errorResponseAction>AFTER_PROCESSING</errorResponseAction>
+      <errorMoveToDirectory>E:/MessageStatus/Errored</errorMoveToDirectory>
+      <errorMoveToFileName></errorMoveToFileName>
+      <checkFileAge>false</checkFileAge>
+      <fileAge>1000</fileAge>
+      <fileSizeMinimum>0</fileSizeMinimum>
+      <fileSizeMaximum></fileSizeMaximum>
+      <ignoreFileSizeMaximum>true</ignoreFileSizeMaximum>
+      <sortBy>date</sortBy>
+      <binary>false</binary>
+      <charsetEncoding>DEFAULT_ENCODING</charsetEncoding>
+    </properties>
+    <transformer version="3.9.0">
+      <elements>
+        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+          <name>Directory mentioning</name>
+          <sequenceNumber>0</sequenceNumber>
+          <enabled>true</enabled>
+          <script>var ErrorDirectory  = &quot;E:/MessageStatus/Errored&quot;;
+channelMap.put(&quot;ErrorDirectory&quot;,ErrorDirectory);
+
+var processedDirectory = &quot;E:/MessageStatus/Processed&quot;;
+channelMap.put(&quot;processedDirectory&quot;,processedDirectory);</script>
+        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+      </elements>
+      <inboundTemplate encoding="base64"></inboundTemplate>
+      <outboundTemplate encoding="base64"></outboundTemplate>
+      <inboundDataType>HL7V2</inboundDataType>
+      <outboundDataType>HL7V2</outboundDataType>
+      <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+          <handleRepetitions>true</handleRepetitions>
+          <handleSubcomponents>true</handleSubcomponents>
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <stripNamespaces>true</stripNamespaces>
+          <segmentDelimiter>\r</segmentDelimiter>
+          <convertLineBreaks>true</convertLineBreaks>
+        </serializationProperties>
+        <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <segmentDelimiter>\r</segmentDelimiter>
+        </deserializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+          <splitType>MSH_Segment</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+        <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+          <segmentDelimiter>\r</segmentDelimiter>
+          <successfulACKCode>AA</successfulACKCode>
+          <successfulACKMessage></successfulACKMessage>
+          <errorACKCode>AE</errorACKCode>
+          <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+          <rejectedACKCode>AR</rejectedACKCode>
+          <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+          <msh15ACKAccept>false</msh15ACKAccept>
+          <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+        </responseGenerationProperties>
+        <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+          <successfulACKCode>AA,CA</successfulACKCode>
+          <errorACKCode>AE,CE</errorACKCode>
+          <rejectedACKCode>AR,CR</rejectedACKCode>
+          <validateMessageControlId>true</validateMessageControlId>
+          <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+          <originalIdMapVariable></originalIdMapVariable>
+        </responseValidationProperties>
+      </inboundProperties>
+      <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+          <handleRepetitions>true</handleRepetitions>
+          <handleSubcomponents>true</handleSubcomponents>
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <stripNamespaces>true</stripNamespaces>
+          <segmentDelimiter>\r</segmentDelimiter>
+          <convertLineBreaks>true</convertLineBreaks>
+        </serializationProperties>
+        <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <segmentDelimiter>\r</segmentDelimiter>
+        </deserializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+          <splitType>MSH_Segment</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+        <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+          <segmentDelimiter>\r</segmentDelimiter>
+          <successfulACKCode>AA</successfulACKCode>
+          <successfulACKMessage></successfulACKMessage>
+          <errorACKCode>AE</errorACKCode>
+          <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+          <rejectedACKCode>AR</rejectedACKCode>
+          <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+          <msh15ACKAccept>false</msh15ACKAccept>
+          <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+        </responseGenerationProperties>
+        <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+          <successfulACKCode>AA,CA</successfulACKCode>
+          <errorACKCode>AE,CE</errorACKCode>
+          <rejectedACKCode>AR,CR</rejectedACKCode>
+          <validateMessageControlId>true</validateMessageControlId>
+          <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+          <originalIdMapVariable></originalIdMapVariable>
+        </responseValidationProperties>
+      </outboundProperties>
+    </transformer>
+    <filter version="3.9.0">
+      <elements/>
+    </filter>
+    <transportName>File Reader</transportName>
+    <mode>SOURCE</mode>
+    <enabled>true</enabled>
+    <waitForPrevious>true</waitForPrevious>
+  </sourceConnector>
+  <destinationConnectors>
+    <connector version="3.9.0">
+      <metaDataId>1</metaDataId>
+      <name>DesitnationFileWriter</name>
+      <properties class="com.mirth.connect.connectors.file.FileDispatcherProperties" version="3.9.0">
+        <pluginProperties/>
+        <destinationConnectorProperties version="3.9.0">
+          <queueEnabled>false</queueEnabled>
+          <sendFirst>false</sendFirst>
+          <retryIntervalMillis>10000</retryIntervalMillis>
+          <regenerateTemplate>false</regenerateTemplate>
+          <retryCount>0</retryCount>
+          <rotate>false</rotate>
+          <includeFilterTransformer>false</includeFilterTransformer>
+          <threadCount>1</threadCount>
+          <threadAssignmentVariable></threadAssignmentVariable>
+          <validateResponse>false</validateResponse>
+          <resourceIds class="linked-hash-map">
+            <entry>
+              <string>Default Resource</string>
+              <string>[Default Resource]</string>
+            </entry>
+          </resourceIds>
+          <queueBufferSize>1000</queueBufferSize>
+          <reattachAttachments>true</reattachAttachments>
+        </destinationConnectorProperties>
+        <scheme>FILE</scheme>
+        <host>E:/MessageStatus/Processed</host>
+        <outputPattern>${MessageControlID}_${CurrentDateTime}_ORM.txt</outputPattern>
+        <anonymous>true</anonymous>
+        <username>anonymous</username>
+        <password>anonymous</password>
+        <timeout>10000</timeout>
+        <keepConnectionOpen>true</keepConnectionOpen>
+        <maxIdleTime>0</maxIdleTime>
+        <secure>true</secure>
+        <passive>true</passive>
+        <validateConnection>true</validateConnection>
+        <outputAppend>true</outputAppend>
+        <errorOnExists>false</errorOnExists>
+        <temporary>false</temporary>
+        <binary>false</binary>
+        <charsetEncoding>DEFAULT_ENCODING</charsetEncoding>
+        <template>${message.encodedData}</template>
+      </properties>
+      <transformer version="3.9.0">
+        <elements>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>DateandTome</name>
+            <sequenceNumber>0</sequenceNumber>
+            <enabled>true</enabled>
+            <script>var CurrentDateTime = DateUtil.getCurrentDate(&quot;yyyyMMddHHmmss&quot;);
+channelMap.put(&quot;CurrentDateTime&quot;,CurrentDateTime);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Generate OrderDetailID</name>
+            <sequenceNumber>1</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// Call SP to get the OrderDetail ID
+
+
+try
+{
+	//Database connection
+var dbConn = DatabaseConnectionFactory.createDatabaseConnection(&apos;net.sourceforge.jtds.jdbc.Driver&apos;,&apos;jdbc:jtds:sqlserver://INFORMIXSERVER:1433/Gensys;instance=SQL2016&apos;,&apos;sa&apos;,&apos;Informix11@9&apos;);
+
+var MessageControlID = msg[&apos;MSH&apos;][&apos;MSH.10&apos;][&apos;MSH.10.1&apos;].toString();
+channelMap.put(&quot;MessageControlID&quot;, MessageControlID );
+
+var ChannelName = Packages.com.mirth.connect.server.controllers.ChannelController.getInstance().getDeployedChannelById(channelId).getName();
+channelMap.put(&quot;ChannelName&quot;, ChannelName );
+
+
+var placerORderNumbers = &apos;&apos;;
+
+//msg[&apos;ORC&apos;][1][&apos;ORC.2&apos;][&apos;ORC.2.1&apos;].toString()
+for each(orc in msg..ORC)
+{
+	placerORderNumbers += orc[&apos;ORC.2&apos;][&apos;ORC.2.1&apos;].toString() + &quot;,&quot;;
+}
+
+//str.replace(/,\s*$/, &quot;&quot;);
+placerORderNumbers = placerORderNumbers.replace(/,\s*$/, &quot;&quot;);
+channelMap.put(&quot;placerORderNumbers&quot;, placerORderNumbers);
+
+
+var OrderDetailIDSP = &quot;exec uspAddEMROrderDetail &apos;&quot;+ChannelName+&quot;&apos;, &apos;&quot;+MessageControlID+&quot;&apos;, &apos;&quot;+placerORderNumbers+&quot;&apos;&quot;;
+logger.info(&quot;OrderDetailIDSP&quot;+ OrderDetailIDSP);
+
+
+var EMROrderDetialresultset = dbConn.executeCachedQuery(OrderDetailIDSP);
+logger.info(&quot;EMROrderDetialresultset&quot;+ EMROrderDetialresultset);
+channelMap.put(&quot;EMROrderDetialresultset&quot;, EMROrderDetialresultset);
+
+
+
+
+
+var OrderDetailID = &quot;&quot;;
+
+while(EMROrderDetialresultset.next())
+{
+
+OrderDetailID = EMROrderDetialresultset.getString(&quot;EMROrderDetailID&quot;);
+	
+}
+
+channelMap.put(&quot;OrderDetailID&quot;, OrderDetailID);
+
+//Try block ends here 
+
+var filename = MessageControlID+&quot;_&quot;+$(&apos;CurrentDateTime&apos;)+&quot;.txt&quot;;
+	channelMap.put(&quot;filename&quot;, filename);
+	
+	var completeFileName = $(&apos;ErrorDirectory&apos;)+&quot;\\&quot;+filename;
+	channelMap.put(&quot;completeFileName&quot;, completeFileName);
+
+}
+
+catch(err)
+{
+		
+	var filename = MessageControlID+&quot;_&quot;+$(&apos;CurrentDateTime&apos;)+&quot;_ORM&quot;+&quot;.txt&quot;;
+	channelMap.put(&quot;filename&quot;, filename);
+	
+	var completeFileName = $(&apos;ErrorDirectory&apos;)+&quot;\\&quot;+filename;
+	channelMap.put(&quot;completeFileName&quot;, completeFileName);&#xd;
+
+    
+	
+FileUtil.write(completeFileName, false, msg);
+	
+logger.info(err);
+logger.info(&quot;We are inside the catch block&quot;);
+throw err;
+}</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Capture Patient data </name>
+            <sequenceNumber>2</sequenceNumber>
+            <enabled>true</enabled>
+            <script>try
+{
+	//Add OderDetailID 
+var OrderDetailID = $(&apos;OrderDetailID&apos;);
+
+//PatientID
+// msg[&apos;PID&apos;][&apos;PID.13&apos;][0][&apos;PID.13.1&apos;].toString()
+var PatientID =  msg[&apos;PID&apos;][&apos;PID.3&apos;][0][&apos;PID.3.1&apos;].toString();
+
+
+
+channelMap.put(&quot;PatientID&quot;, PatientID);
+
+//PatientFirstName
+var PatientFirstName = msg[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.1&apos;].toString();
+
+//MiddleName
+var MiddleName = msg[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.3&apos;].toString();
+
+//LastName
+ var LastName = msg[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.2&apos;].toString();
+
+//Nametypecode
+var  Nametypecode = msg[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.7&apos;].toString();
+
+//DateOfBirth
+var DateOfBirth = msg[&apos;PID&apos;][&apos;PID.7&apos;][&apos;PID.7.1&apos;].toString();
+
+//Gender
+var Gender = msg[&apos;PID&apos;][&apos;PID.8&apos;][&apos;PID.8.1&apos;].toString();
+
+//Race 
+var Race = msg[&apos;PID&apos;][&apos;PID.10&apos;][&apos;PID.10.1&apos;].toString();
+
+//AddressLine1
+var AddressLine1 = msg[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.1&apos;].toString();
+
+
+
+//CityName
+var CityName = msg[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.3&apos;].toString();
+
+//StateName
+var StateName = msg[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.4&apos;].toString();
+
+//ZipCode
+var ZipCode = msg[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.5&apos;].toString();
+
+//Countryname 
+var Countryname = msg[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.6&apos;].toString();
+
+//AddressType
+var AddressType = msg[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.7&apos;].toString();
+
+//PhoneNo
+//Need to check these later with repetation field.
+var PhoneNo =msg[&apos;PID&apos;][&apos;PID.13&apos;][0][&apos;PID.13.1&apos;].toString();
+channelMap.put(&quot;PhoneNo&quot;,PhoneNo);
+
+//PrimaryLanguage
+var PrimaryLanguage = msg[&apos;PID&apos;][&apos;PID.15&apos;][&apos;PID.15.2&apos;].toString();
+
+//SSN
+var SSN = msg[&apos;PID&apos;][&apos;PID.19&apos;][&apos;PID.19.1&apos;].toString();
+
+//EthnicGroup
+var EthnicGroup = msg[&apos;PID&apos;][&apos;PID.22&apos;][&apos;PID.22.2&apos;].toString();
+
+var SqlSpToExecute = &quot;exec uspAddEMRPatientDetail &apos;&quot;+OrderDetailID+&quot;&apos;, &apos;&quot;+PatientID+&quot;&apos;, &apos;&quot;+PatientFirstName+&quot;&apos;, &apos;&quot;+MiddleName+&quot;&apos;, &apos;&quot;+LastName+&quot;&apos;,&apos;&quot;+Nametypecode+&quot;&apos;,&apos;&quot;+DateOfBirth+&quot;&apos;,&apos;&quot;+Gender+&quot;&apos;,&apos;&quot;+Race+&quot;&apos;,&apos;&quot;+AddressLine1+&quot;&apos;,&apos;&quot;+CityName+&quot;&apos;,&apos;&quot;+StateName+&quot;&apos;,&apos;&quot;+ZipCode+&quot;&apos;,&apos;&quot;+Countryname+&quot;&apos;,&apos;&quot;+AddressType+&quot;&apos;,&apos;&quot;+PhoneNo+&quot;&apos;,&apos;&quot;+PrimaryLanguage+&quot;&apos;,&apos;&quot;+SSN+&quot;&apos;,&apos;&quot;+EthnicGroup+&quot;&apos;&quot;;
+channelMap.put(&quot;SqlSpToExecute&quot;,SqlSpToExecute);
+
+var ResultPatintSP = dbConn.executeUpdate(SqlSpToExecute);
+channelMap.put(&quot;ResultPatintSP&quot;,ResultPatintSP);
+
+
+
+}
+
+catch(err)
+{
+		
+	var filename = MessageControlID+&quot;_&quot;+$(&apos;CurrentDateTime&apos;)+&quot;_&quot;+&quot;ORM&quot;+&quot;.txt&quot;;
+	channelMap.put(&quot;filename&quot;, filename);
+	
+	var completeFileName = $(&apos;ErrorDirectory&apos;)+&quot;\\&quot;+filename;
+	channelMap.put(&quot;completeFileName&quot;, completeFileName);&#xd;
+
+    
+	
+FileUtil.write(completeFileName, false, msg);
+	
+logger.info(err);
+logger.info(&quot;We are inside the catch block&quot;);
+throw err;
+}</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Capture Provider Details data</name>
+            <sequenceNumber>3</sequenceNumber>
+            <enabled>true</enabled>
+            <script>//Json
+try
+{
+var PatientClass  = msg[&apos;PV1&apos;][&apos;PV1.2&apos;][&apos;PV1.2.1&apos;].toString();
+
+var  AssignedPatientLocation = msg[&apos;PV1&apos;][&apos;PV1.3&apos;][&apos;PV1.3.1&apos;].toString();
+
+//Check with Ranjan what these NPI he is looking ofr 
+var NPI =  msg[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.1&apos;].toString();
+
+var FirstName = msg[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.2&apos;].toString();
+
+var LastName  = msg[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.3&apos;].toString();
+
+var Degree  = msg[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.7&apos;].toString();
+
+var AssigningAuthority  = msg[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.9&apos;][&apos;PV1.7.9.2&apos;].toString();
+
+var ProfessionalSuffix =  msg[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.5&apos;].toString();
+
+var VisitIDNumber = msg[&apos;PV1&apos;][&apos;PV1.19&apos;][&apos;PV1.19.1&apos;].toString();
+
+//Need to check with Ranjan
+var VisitAssigningAuthority = msg[&apos;PV1&apos;][&apos;PV1.19&apos;][&apos;PV1.19.4&apos;][&apos;PV1.19.4.1&apos;].toString();
+
+var IdentifierTypeCode = msg[&apos;PV1&apos;][&apos;PV1.19&apos;][&apos;PV1.19.5&apos;].toString();
+
+var ServicingAuthority = msg[&apos;PV1&apos;][&apos;PV1.39&apos;][&apos;PV1.39.1&apos;].toString();
+
+var AdmitDate = msg[&apos;PV1&apos;][&apos;PV1.44&apos;][&apos;PV1.44.1&apos;].toString();
+
+var DischargeDate = msg[&apos;PV1&apos;][&apos;PV1.45&apos;][&apos;PV1.45.1&apos;].toString();
+
+var VisitIndicator = msg[&apos;PV1&apos;][&apos;PV1.51&apos;][&apos;PV1.51.1&apos;].toString();
+
+var SqlSpToExecuteToAddProviderDetials = &quot;exec uspAddEMRProviderDetail &apos;&quot;+$(&apos;OrderDetailID&apos;) +&quot;&apos;, &apos;&quot;+PatientClass+&quot;&apos;, &apos;&quot;+AssignedPatientLocation+&quot;&apos;, &apos;&quot;+NPI+&quot;&apos;, &apos;&quot;+FirstName+&quot;&apos;,&apos;&quot;+LastName+&quot;&apos;,&apos;&quot;+Degree+&quot;&apos;,&apos;&quot;+AssigningAuthority+&quot;&apos;,&apos;&quot;+ProfessionalSuffix+&quot;&apos;,&apos;&quot;+VisitIDNumber+&quot;&apos;,&apos;&quot;+VisitAssigningAuthority+&quot;&apos;,&apos;&quot;+IdentifierTypeCode+&quot;&apos;,&apos;&quot;+ServicingAuthority+&quot;&apos;,&apos;&quot;+AdmitDate+&quot;&apos;,&apos;&quot;+DischargeDate+&quot;&apos;,&apos;&quot;+VisitIndicator+&quot;&apos;&quot;;
+
+channelMap.put(&quot;SqlSpToExecuteToAddProviderDetials&quot;, SqlSpToExecuteToAddProviderDetials);
+
+var ResultProviderSP = dbConn.executeUpdate(SqlSpToExecuteToAddProviderDetials);
+channelMap.put(&quot;ResultProviderSP&quot;,ResultProviderSP);
+
+}
+
+catch(err)
+{
+		
+	var filename = MessageControlID+&quot;_&quot;+$(&apos;CurrentDateTime&apos;)+&quot;_&quot;+&quot;ORM&quot;+&quot;.txt&quot;;
+     channelMap.put(&quot;filename&quot;, filename);
+	
+	var completeFileName = $(&apos;ErrorDirectory&apos;)+&quot;\\&quot;+filename;
+	channelMap.put(&quot;completeFileName&quot;, completeFileName);&#xd;
+
+    
+	
+FileUtil.write(completeFileName, false, msg);
+	
+logger.info(err);
+logger.info(&quot;We are inside the catch block&quot;);
+throw err;
+}</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>CaptureInsurance Details data</name>
+            <sequenceNumber>4</sequenceNumber>
+            <enabled>true</enabled>
+            <script>try
+{
+	var EMROrderDetailID = $(&apos;OrderDetailID&apos;)
+
+var InsurancePlanID = msg[&apos;IN1&apos;][&apos;IN1.2&apos;][&apos;IN1.2.1&apos;].toString();
+
+var InsuranceCompanyID  = msg[&apos;IN1&apos;][&apos;IN1.3&apos;][&apos;IN1.3.1&apos;].toString();
+
+var AssigningAuthority  = msg[&apos;IN1&apos;][&apos;IN1.3&apos;][&apos;IN1.3.4&apos;][&apos;IN1.3.4.1&apos;].toString() + &quot;&amp;&quot; +msg[&apos;IN1&apos;][&apos;IN1.3&apos;][&apos;IN1.3.4&apos;][&apos;IN1.3.4.2&apos;].toString()+&quot;&amp;&quot;+msg[&apos;IN1&apos;][&apos;IN1.3&apos;][&apos;IN1.3.4&apos;][&apos;IN1.3.4.3&apos;].toString();
+
+var IdentifierTypeCode = msg[&apos;IN1&apos;][&apos;IN1.3&apos;][&apos;IN1.3.5&apos;].toString();
+
+var InsuranceCompanyName  = msg[&apos;IN1&apos;][&apos;IN1.4&apos;][&apos;IN1.4.1&apos;].toString();
+
+var AddressLine1 = msg[&apos;IN1&apos;][&apos;IN1.5&apos;][&apos;IN1.5.1&apos;].toString();
+
+var CityName =  msg[&apos;IN1&apos;][&apos;IN1.5&apos;][&apos;IN1.5.3&apos;].toString();
+
+var StateName = msg[&apos;IN1&apos;][&apos;IN1.5&apos;][&apos;IN1.5.4&apos;].toString();
+
+var ZipCode =  msg[&apos;IN1&apos;][&apos;IN1.5&apos;][&apos;IN1.5.5&apos;].toString();
+
+//Need to check thse ranjan
+var PhoneNo  = msg[&apos;IN1&apos;][&apos;IN1.7&apos;][&apos;IN1.7.1&apos;].toString();
+
+var GroupName  = msg[&apos;IN1&apos;][&apos;IN1.9&apos;][&apos;IN1.9.1&apos;].toString();
+
+var PlanEffectiveDate  = msg[&apos;IN1&apos;][&apos;IN1.12&apos;][&apos;IN1.12.1&apos;].toString();
+
+var PlanType  = msg[&apos;IN1&apos;][&apos;IN1.15&apos;][&apos;IN1.15.1&apos;].toString();
+
+var InsuredFirstName  = msg[&apos;IN1&apos;][&apos;IN1.16&apos;][&apos;IN1.16.1&apos;].toString();
+
+var InsuredMiddleName  = msg[&apos;IN1&apos;][&apos;IN1.16&apos;][&apos;IN1.16.3&apos;].toString();
+
+var InsuredLastName = msg[&apos;IN1&apos;][&apos;IN1.16&apos;][&apos;IN1.16.2&apos;].toString();
+
+var SubscriberRelationship =  msg[&apos;IN1&apos;][&apos;IN1.17&apos;][&apos;IN1.17.1&apos;].toString();
+
+var InsuredDateOfBirth  = msg[&apos;IN1&apos;][&apos;IN1.18&apos;][&apos;IN1.18.1&apos;].toString();
+
+var InsuredAddressLine1  = msg[&apos;IN1&apos;][&apos;IN1.19&apos;][&apos;IN1.19.1&apos;].toString();
+
+var InsuredCityName = msg[&apos;IN1&apos;][&apos;IN1.19&apos;][&apos;IN1.19.3&apos;].toString();
+
+var InsuredStateName = msg[&apos;IN1&apos;][&apos;IN1.19&apos;][&apos;IN1.19.4&apos;].toString();
+
+var InsuredZipCode  = msg[&apos;IN1&apos;][&apos;IN1.19&apos;][&apos;IN1.19.5&apos;].toString();
+
+var BillingStatus =  msg[&apos;IN1&apos;][&apos;IN1.32&apos;][&apos;IN1.32.1&apos;].toString();
+
+var PolicyNumber  = msg[&apos;IN1&apos;][&apos;IN1.36&apos;][&apos;IN1.36.1&apos;].toString();
+
+var InsuredGender  = msg[&apos;IN1&apos;][&apos;IN1.43&apos;][&apos;IN1.43.1&apos;].toString();
+
+var SignatureCode  = msg[&apos;IN1&apos;][&apos;IN1.50&apos;][&apos;IN1.50.1&apos;].toString();
+
+
+var SignatureCodeDate  = msg[&apos;IN1&apos;][&apos;IN1.51&apos;][&apos;IN1.51.1&apos;].toString();
+
+
+var SqlSpToExecuteAddInsuranceDetials = &quot;exec uspAddEMRInsuranceDetail &apos;&quot;+EMROrderDetailID+&quot;&apos;, &apos;&quot;+InsurancePlanID+&quot;&apos;, &apos;&quot;+InsuranceCompanyID+&quot;&apos;, &apos;&quot;+AssigningAuthority+&quot;&apos;, &apos;&quot;+IdentifierTypeCode+&quot;&apos;,&apos;&quot;+InsuranceCompanyName+&quot;&apos;,&apos;&quot;+AddressLine1+&quot;&apos;,&apos;&quot;+CityName+&quot;&apos;,&apos;&quot;+StateName+&quot;&apos;,&apos;&quot;+ZipCode+&quot;&apos;,&apos;&quot;+PhoneNo+&quot;&apos;,&apos;&quot;+GroupName+&quot;&apos;,&apos;&quot;+PlanEffectiveDate+&quot;&apos;,&apos;&quot;+PlanType+&quot;&apos;,&apos;&quot;+InsuredFirstName+&quot;&apos;,&apos;&quot;+InsuredMiddleName+&quot;&apos;,&apos;&quot;+InsuredLastName+&quot;&apos;,&apos;&quot;+SubscriberRelationship+&quot;&apos;,&apos;&quot;+InsuredDateOfBirth+&quot;&apos;,&apos;&quot;+InsuredAddressLine1+&quot;&apos;,&apos;&quot;+InsuredCityName+&quot;&apos;,&apos;&quot;+InsuredStateName+&quot;&apos;,&apos;&quot;+InsuredZipCode+&quot;&apos;,&apos;&quot;+BillingStatus+&quot;&apos;,&apos;&quot;+PolicyNumber+&quot;&apos;,&apos;&quot;+InsuredGender+&quot;&apos;,&apos;&quot;+SignatureCode+&quot;&apos;,&apos;&quot;+SignatureCodeDate+&quot;&apos;&quot;;
+channelMap.put(&quot;SqlSpToExecuteAddInsuranceDetials&quot;, SqlSpToExecuteAddInsuranceDetials);
+
+var ResultInsuranceSP = dbConn.executeUpdate(SqlSpToExecuteAddInsuranceDetials);
+channelMap.put(&quot;ResultInsuranceSP&quot;,ResultInsuranceSP);
+
+}
+
+catch(err)
+{
+		
+	var filename = MessageControlID+&quot;_&quot;+$(&apos;CurrentDateTime&apos;)+&quot;_&quot;+&quot;ORM&quot;+&quot;.txt&quot;;
+	channelMap.put(&quot;filename&quot;, filename);
+	
+	var completeFileName = $(&apos;ErrorDirectory&apos;)+&quot;\\&quot;+filename;
+	channelMap.put(&quot;completeFileName&quot;, completeFileName);&#xd;
+
+    
+	
+FileUtil.write(completeFileName, false, msg);
+	
+logger.info(err);
+logger.info(&quot;We are inside the catch block&quot;);
+throw err;
+}</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Capture Common ORder detail</name>
+            <sequenceNumber>5</sequenceNumber>
+            <enabled>true</enabled>
+            <script>try
+{
+	var EMROrderDetailID  = $(&apos;OrderDetailID&apos;);
+
+var i = 0;
+
+var SqlSpToExecuteAddCommonOrderDetail = &apos;&apos;;
+
+var ResultCommonOrderSP = &apos;&apos;;
+
+for each(orc in msg..ORC)
+{
+
+
+//Orer control or staus 
+var OrderStatus  = msg[&apos;ORC&apos;][i][&apos;ORC.1&apos;][&apos;ORC.1.1&apos;].toString();
+channelMap.put(&apos;OrderStatus&apos;,OrderStatus);
+
+var PlacerOrderNumber  = msg[&apos;ORC&apos;][i][&apos;ORC.2&apos;][&apos;ORC.2.1&apos;].toString();
+
+var TransactionDate  = msg[&apos;ORC&apos;][i][&apos;ORC.9&apos;][&apos;ORC.9.1&apos;].toString();
+
+var EnteredByNPI  = msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.1&apos;].toString();
+
+var EnteredByFirstName = msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.2&apos;].toString();
+
+
+var EnteredByLastName = msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.3&apos;].toString();
+
+var EnteredByAssigningAuthority = msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.9&apos;][&apos;ORC.10.9.1&apos;].toString() +&quot;&amp;&quot;+msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.9&apos;][&apos;ORC.10.9.2&apos;].toString()+&quot;&amp;&quot;+msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.9&apos;][&apos;ORC.10.9.3&apos;].toString();
+
+var EnteredByNameTypeCode = msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.10&apos;].toString();
+
+var EnteredByIdentifierTypeCode  = msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.13&apos;].toString();
+
+var EnteredByProfessionalSuffix = msg[&apos;ORC&apos;][i][&apos;ORC.10&apos;][&apos;ORC.10.5&apos;].toString();
+
+var OrderingProviderNPI = msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.1&apos;].toString();
+
+var OrderingProviderFirstName = msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.2&apos;].toString();
+
+var OrderingProviderLastName = msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.3&apos;].toString();
+
+var OrderingProviderAssigningAuthority =  msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.9&apos;][&apos;ORC.12.9.1&apos;].toString()+&quot;&amp;&quot;+msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.9&apos;][&apos;ORC.12.9.2&apos;].toString()+&quot;&amp;&quot;+msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.9&apos;][&apos;ORC.12.9.3&apos;].toString();
+
+var OrderingProviderNameTypeCode = msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.10&apos;].toString();
+
+var OrderingProviderIdentifierTypeCode = msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.13&apos;].toString();
+
+var OrderingProviderProfessionalSuffix = msg[&apos;ORC&apos;][i][&apos;ORC.12&apos;][&apos;ORC.12.5&apos;].toString();
+
+
+//need to check thse with Ranjan
+var CallBackPhoneNo = msg[&apos;ORC&apos;][i][&apos;ORC.14&apos;][&apos;ORC.14.1&apos;].toString();
+
+var OrderingFacilityName = msg[&apos;ORC&apos;][i][&apos;ORC.21&apos;][&apos;ORC.21.1&apos;].toString();
+
+var OrderingFacilityIDNumber = msg[&apos;ORC&apos;][i][&apos;ORC.21&apos;][&apos;ORC.21.2&apos;].toString();
+
+var OrderingFacilityAssigningAuthority = msg[&apos;ORC&apos;][i][&apos;ORC.21&apos;][&apos;ORC.21.6&apos;][&apos;ORC.21.6.1&apos;].toString()+&quot;&amp;&quot;+msg[&apos;ORC&apos;][i][&apos;ORC.21&apos;][&apos;ORC.21.6&apos;][&apos;ORC.21.6.2&apos;].toString()+&quot;&amp;&quot;+msg[&apos;ORC&apos;][i][&apos;ORC.21&apos;][&apos;ORC.21.6&apos;][&apos;ORC.21.6.3&apos;].toString();
+
+var AddressLine1  = msg[&apos;ORC&apos;][i][&apos;ORC.22&apos;][&apos;ORC.22.1&apos;].toString();
+
+var CityName = msg[&apos;ORC&apos;][i][&apos;ORC.22&apos;][&apos;ORC.22.3&apos;].toString();
+
+var StateName = msg[&apos;ORC&apos;][i][&apos;ORC.22&apos;][&apos;ORC.22.4&apos;].toString();
+
+var ZipCode = msg[&apos;ORC&apos;][i][&apos;ORC.22&apos;][&apos;ORC.22.5&apos;].toString();
+
+var OrderingFacilityPhoneNo = msg[&apos;ORC&apos;][i][&apos;ORC.23&apos;][&apos;ORC.23.1&apos;].toString();
+
+var OrderType = msg[&apos;ORC&apos;][i][&apos;ORC.29&apos;][&apos;ORC.29.1&apos;].toString();
+
+
+SqlSpToExecuteAddCommonOrderDetail = &quot;exec uspAddEMRCommonOrderDetail &apos;&quot;+EMROrderDetailID+&quot;&apos;, &apos;&quot;+OrderStatus+&quot;&apos;, &apos;&quot;+PlacerOrderNumber+&quot;&apos;, &apos;&quot;+TransactionDate+&quot;&apos;, &apos;&quot;+EnteredByNPI+&quot;&apos;,&apos;&quot;+EnteredByFirstName+&quot;&apos;,&apos;&quot;+EnteredByLastName+&quot;&apos;,&apos;&quot;+EnteredByAssigningAuthority+&quot;&apos;,&apos;&quot;+EnteredByNameTypeCode+&quot;&apos;,&apos;&quot;+EnteredByIdentifierTypeCode+&quot;&apos;,&apos;&quot;+EnteredByProfessionalSuffix+&quot;&apos;,&apos;&quot;+OrderingProviderNPI+&quot;&apos;,&apos;&quot;+OrderingProviderFirstName+&quot;&apos;,&apos;&quot;+OrderingProviderLastName+&quot;&apos;,&apos;&quot;+OrderingProviderAssigningAuthority+&quot;&apos;,&apos;&quot;+OrderingProviderNameTypeCode+&quot;&apos;,&apos;&quot;+OrderingProviderIdentifierTypeCode+&quot;&apos;,&apos;&quot;+OrderingProviderProfessionalSuffix+&quot;&apos;,&apos;&quot;+CallBackPhoneNo+&quot;&apos;,&apos;&quot;+OrderingFacilityName+&quot;&apos;,&apos;&quot;+OrderingFacilityIDNumber+&quot;&apos;,&apos;&quot;+OrderingFacilityAssigningAuthority+&quot;&apos;,&apos;&quot;+AddressLine1+&quot;&apos;,&apos;&quot;+CityName+&quot;&apos;,&apos;&quot;+StateName+&quot;&apos;,&apos;&quot;+ZipCode+&quot;&apos;,&apos;&quot;+OrderingFacilityPhoneNo+&quot;&apos;,&apos;&quot;+OrderType+&quot;&apos;&quot;;
+
+
+ResultCommonOrderSP =  dbConn.executeUpdate(SqlSpToExecuteAddCommonOrderDetail);
+
+
+i++;
+}
+
+channelMap.put(&quot;SqlSpToExecuteAddCommonOrderDetail&quot;, SqlSpToExecuteAddCommonOrderDetail);
+channelMap.put(&quot;ResultCommonOrderSP&quot;,ResultCommonOrderSP);
+}
+
+
+catch(err)
+{
+		
+	var filename = MessageControlID+&quot;_&quot;+$(&apos;CurrentDateTime&apos;)+&quot;_&quot;+&quot;ORM&quot;+&quot;.txt&quot;;
+	channelMap.put(&quot;filename&quot;, filename);
+	
+	var completeFileName = $(&apos;ErrorDirectory&apos;)+&quot;\\&quot;+filename;
+	channelMap.put(&quot;completeFileName&quot;, completeFileName);&#xd;
+
+    
+	
+FileUtil.write(completeFileName, false, msg);
+	
+logger.info(err);
+logger.info(&quot;We are inside the catch block&quot;);
+throw err;
+}</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Capture Observation Request </name>
+            <sequenceNumber>6</sequenceNumber>
+            <enabled>true</enabled>
+            <script>try
+{
+	var EMROrderDetailID  = $(&apos;OrderDetailID&apos;);
+
+var i = 0;
+
+var SqlSpToExecuteAddObservations = &apos;&apos;;
+
+var ResultObservationsSP = &apos;&apos;;
+
+for each(obr in msg..OBR)
+{
+
+var PlacerOrderNumber =msg[&apos;OBR&apos;][i][&apos;OBR.2&apos;][&apos;OBR.2.1&apos;].toString();
+
+var UniversalServiceIdentifier = msg[&apos;OBR&apos;][i][&apos;OBR.4&apos;][&apos;OBR.4.1&apos;].toString();
+
+var UniversalServiceIdentifierText = msg[&apos;OBR&apos;][i][&apos;OBR.4&apos;][&apos;OBR.4.2&apos;].toString();
+
+var OrderingProviderNPI =  msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.1&apos;].toString()
+
+var OrderingProviderFirstName = msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.2&apos;].toString()
+
+var OrderingProviderLastName = msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.3&apos;].toString()
+
+var OrderingProviderAssigningAuthority = msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.9&apos;][&apos;OBR.16.9.1&apos;].toString()+&quot;&amp;&quot;+msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.9&apos;][&apos;OBR.16.9.2&apos;].toString()+&quot;&amp;&quot;+msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.9&apos;][&apos;OBR.16.9.3&apos;].toString(); 
+
+var OrderingProviderNameTypeCode = msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.10&apos;].toString();
+
+var OrderingProviderIdentifierTypeCode = msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.13&apos;].toString();
+ 
+var OrderingProviderProfessionalSuffix = msg[&apos;OBR&apos;][i][&apos;OBR.16&apos;][&apos;OBR.16.5&apos;].toString();
+
+var CallBackPhoneNo = msg[&apos;OBR&apos;][i][&apos;OBR.17&apos;][&apos;OBR.17.1&apos;].toString();
+
+var ProcedureCodeIdentifier = msg[&apos;OBR&apos;][i][&apos;OBR.44&apos;][&apos;OBR.44.1&apos;].toString();
+
+var ProcedureCodeIdentifierText = msg[&apos;OBR&apos;][i][&apos;OBR.44&apos;][&apos;OBR.44.2&apos;].toString();
+
+var CodingSystemName = msg[&apos;OBR&apos;][i][&apos;OBR.44&apos;][&apos;OBR.44.3&apos;].toString();
+
+
+SqlSpToExecuteAddObservations = &quot;exec uspAddEMRObservationRequestDetail &apos;&quot;+EMROrderDetailID+&quot;&apos;, &apos;&quot;+PlacerOrderNumber+&quot;&apos;, &apos;&quot;+UniversalServiceIdentifier+&quot;&apos;, &apos;&quot;+UniversalServiceIdentifierText+&quot;&apos;, &apos;&quot;+OrderingProviderNPI+&quot;&apos;,&apos;&quot;+OrderingProviderFirstName+&quot;&apos;,&apos;&quot;+OrderingProviderLastName+&quot;&apos;,&apos;&quot;+OrderingProviderAssigningAuthority+&quot;&apos;,&apos;&quot;+OrderingProviderNameTypeCode+&quot;&apos;,&apos;&quot;+OrderingProviderIdentifierTypeCode+&quot;&apos;,&apos;&quot;+OrderingProviderProfessionalSuffix+&quot;&apos;,&apos;&quot;+CallBackPhoneNo+&quot;&apos;,&apos;&quot;+ProcedureCodeIdentifier+&quot;&apos;,&apos;&quot;+ProcedureCodeIdentifierText+&quot;&apos;,&apos;&quot;+CodingSystemName+&quot;&apos;&quot;;
+
+if( $(&apos;OrderStatus&apos;) != &quot;CA&quot; )
+{ 
+	ResultObservationsSP = dbConn.executeUpdate(SqlSpToExecuteAddObservations);
+}
+
+i++;
+
+}
+
+channelMap.put(&quot;SqlSpToExecuteAddObservations&quot;, SqlSpToExecuteAddObservations);
+channelMap.put(&quot;ResultObservationsSP&quot;,ResultObservationsSP);
+}
+
+catch(err)
+{
+		
+	var filename = MessageControlID+&quot;_&quot;+$(&apos;CurrentDateTime&apos;)+&quot;_&quot;+&quot;ORM&quot;+&quot;.txt&quot;;
+	channelMap.put(&quot;filename&quot;, filename);
+		
+	var completeFileName = $(&apos;ErrorDirectory&apos;)+&quot;\\&quot;+filename;
+	channelMap.put(&quot;completeFileName&quot;, completeFileName);&#xd;
+
+    
+	
+FileUtil.write(completeFileName, false, msg);
+	
+logger.info(err);
+logger.info(&quot;We are inside the catch block&quot;);
+throw err;
+}</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        </elements>
+        <inboundTemplate encoding="base64">TVNIfF5+XCZ8RG9jdVRBUF5MYWJ8MTMxNjI4NTA5MV4yLjE2Ljg0MC4xLjExMzg4My40LjZeSVNP
+fEdlbmVzaXN8fDIwMjAwODI4MDk1NjMwLjYxMi0wNTAwfHxPTUxeTzIxXk9NTF9PMjF8NTM0NzZ8
+UHwyLjZ8fHxBTHxBTHx8fHx8fENlbnRyYWwgSmVyc2V5IFVyZ2VudCBDYXJlIC0gQnJvd25zIE1p
+bGxzXkxeXl5eQnJvd25zIE1pbGxzIFVDJjIuMTYuODQwLjEuMTEzODgzLjMuMzcwNC4xLjMwLjcm
+SVNPXl5OSjA3Xl4xMApQSUR8MXx8MTgzNjAzXl5eTkowMDcgLSBDZW50cmFsIEplcnMmMi4xNi44
+NDAuMS4xMTM4ODMuMy4zNzA0LjEuMzAuNyZJU09eTVJ+MF5eXlNTTiYyLjE2Ljg0MC4xLjExMzg4
+My40LjEmSVNPXlNTfHxURVNUXkdFTkVTSVNeXl5eXkx8fDE5OTEwMTAxfEZ8fDIxMDYtM15XaGl0
+ZV5ITDcwMDA1fDEyMyBUZXN0aW5nIFN0cmVldF5eU2lvdXggRmFsbHNeU0ReNTcxMDVeVVNBXkh8
+fDYwNTU1NTU1NTVeUFJOXlBIXl5eNjA1XjU1NTU1NTVeXl5eXjYwNTU1NTU1NTV+bm9uZUBub25l
+LmNvbV5QUlNeSW50ZXJuZXRebm9uZUBub25lLmNvbV5eXl5eXl5ebm9uZUBub25lLmNvbXx8ZW5n
+XkVuZ2xpc2heSVNPNjM5fHx8fDAwMC0wMC0wMDAwfHx8MjE4Ni01Xk5vdCBIaXNwYW5pYyBvciBM
+YXRpbm9eQ0RDUkVDClBWMXwxfE98QnJvd25zIE1pbGxzIFVDfHx8fF5Eb2N1dGFwXkRvY3Rvcl5e
+Xl5NRF5eTlBJJjIuMTYuODQwLjEuMTEzODgzLjQuNiZJU09eXl5eXl5eXl5eXl5NRHx8fHx8fHx8
+fHx8fDQ2NTI1MF5eXkJyb3ducyBNaWxscyBVQyYxMzE2Mjg1MDkxJk5QSV5WTnx8fHx8fHx8fHx8
+fHx8fHx8fHx8QnJvd25zIE1pbGxzIFVDfHx8fHx8MjAyMDA4MjgwNzMyNTYuMDAwfHx8fHx8VgpJ
+TjF8MXw5ODIwMHw5ODIwMF5eXk5KMDA3IC0gQ2VudHJhbCBKZXJzJjIuMTYuODQwLjEuMTEzODgz
+LjMuMzcwNC4xLjMwLjcmSVNPXlV8QkNCU3xQTyBCT1ggMTMwMV5eTkVQVFVORV5OSl4wNzc1NDEz
+MDF8fDg4ODQzNTQzODNeV1BOXlBIXl5eODg4XjQzNTQzODNeXl5eXjg4ODQzNTQzODN8fEJDQlMt
+Tko6IEhPUklaT04gQkNCUyAxMzAxICBMb2NhbHx8fDIwMjAwMzIxfHx8Qmx1ZSBDcm9zcy9CbHVl
+IFNoaWVsZHxURVNUXkdFTkVTSVN8U0VMXlNlbGZeSEw3MDA2M3wxOTkxMDEwMXwxMjMgVGVzdGlu
+ZyBTdHJlZXReXlNpb3V4IEZhbGxzXlNEXjU3MTA1fHx8MXx8fHx8fHx8fHx8fHx8MTI0MzU2fHx8
+fHx8fEZ8fHx8fHx8TXwyMDIwMDMyMQpPUkN8Tld8NTM0NzdeTkowMDcgLSBDZW50cmFsIEplcnNe
+Mi4xNi44NDAuMS4xMTM4ODMuMy4zNzA0LjEuMzAuN15JU098fHx8fHx8MjAyMDA4MjgwOTU2MzAu
+NjIwLTA1MDB8XkRvY3V0YXBeRG9jdG9yXl5eXl5eTlBJJjIuMTYuODQwLjEuMTEzODgzLjQuNiZJ
+U09eTF5eXk5QSV5eXl5eXl5eTUR8fF5Eb2N1dGFwXkRvY3Rvcl5eXl5eXk5QSSYyLjE2Ljg0MC4x
+LjExMzg4My40LjYmSVNPXkxeXl5OUEleXl5eXl5eXk1EfHw2MDk3NTcxNzE3XldQTl5QSF5eXjYw
+OV43NTcxNzE3Xl5eXl42MDk3NTcxNzE3fHx8fHx8fEJyb3ducyBNaWxscyBVQ15eMTMxNjI4NTA5
+MV5eXk5QSSYyLjE2Ljg0MC4xLjExMzg4My40LjYmSVNPfDYgRWFybGluIEF2ZSwgU3RlIDE0MF5e
+QnJvd25zIE1pbGxzXk5KXjA4MDE1MTc0NXw2MDk3NTcxNzE3XldQTl5QSF5eXjYwOV43NTcxNzE3
+Xl5eXl42MDk3NTcxNzE3fHx8fHx8TwpPQlJ8MXw1MzQ3N15OSjAwNyAtIENlbnRyYWwgSmVyc14y
+LjE2Ljg0MC4xLjExMzg4My4zLjM3MDQuMS4zMC43XklTT3x8ODEwMDNeVVJJTkFMWVNJUyBXSVRI
+T1VUIE1JQ1JPU0NPUFleQzR8fHx8fHx8fHx8fHxeRG9jdXRhcF5Eb2N0b3JeXl5eXl5OUEkmMi4x
+Ni44NDAuMS4xMTM4ODMuNC42JklTT15MXl5eTlBJXl5eXl5eXl5NRHw2MDk3NTcxNzE3XldQTl5Q
+SF5eXjYwOV43NTcxNzE3Xl5eXl42MDk3NTcxNzE3fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8
+ODEwMDNeVVJJTkFMWVNJUyBXSVRIT1VUIE1JQ1JPU0NPUFleQzQKT1JDfE5XfDUzNDc4Xk5KMDA3
+IC0gQ2VudHJhbCBKZXJzXjIuMTYuODQwLjEuMTEzODgzLjMuMzcwNC4xLjMwLjdeSVNPfHx8fHx8
+fDIwMjAwODI4MDk1NjMwLjgyNS0wNTAwfF5Eb2N1dGFwXkRvY3Rvcl5eXl5eXk5QSSYyLjE2Ljg0
+MC4xLjExMzg4My40LjYmSVNPXkxeXl5OUEleXl5eXl5eXk1EfHxeRG9jdXRhcF5Eb2N0b3JeXl5e
+Xl5OUEkmMi4xNi44NDAuMS4xMTM4ODMuNC42JklTT15MXl5eTlBJXl5eXl5eXl5NRHx8NjA5NzU3
+MTcxN15XUE5eUEheXl42MDleNzU3MTcxN15eXl5eNjA5NzU3MTcxN3x8fHx8fHxCcm93bnMgTWls
+bHMgVUNeXjEzMTYyODUwOTFeXl5OUEkmMi4xNi44NDAuMS4xMTM4ODMuNC42JklTT3w2IEVhcmxp
+biBBdmUsIFN0ZSAxNDBeXkJyb3ducyBNaWxsc15OSl4wODAxNTE3NDV8NjA5NzU3MTcxN15XUE5e
+UEheXl42MDleNzU3MTcxN15eXl5eNjA5NzU3MTcxN3x8fHx8fE8KT0JSfDJ8NTM0NzheTkowMDcg
+LSBDZW50cmFsIEplcnNeMi4xNi44NDAuMS4xMTM4ODMuMy4zNzA0LjEuMzAuN15JU098fDg3NDI2
+XlNBUlMgQ09WSUQtMTkgQW50aWdlbiBUZXN0XkM0fHx8fHx8fHx8fHx8XkRvY3V0YXBeRG9jdG9y
+Xl5eXl5eTlBJJjIuMTYuODQwLjEuMTEzODgzLjQuNiZJU09eTF5eXk5QSV5eXl5eXl5eTUR8NjA5
+NzU3MTcxN15XUE5eUEheXl42MDleNzU3MTcxN15eXl5eNjA5NzU3MTcxN3x8fHx8fHx8fHx8fHx8
+fHx8fHx8fHx8fHx8fDg3NDI2XlNBUlMgQ09WSUQtMTkgQW50aWdlbiBUZXN0XkM0Cg==</inboundTemplate>
+        <outboundTemplate encoding="base64"></outboundTemplate>
+        <inboundDataType>HL7V2</inboundDataType>
+        <outboundDataType>HL7V2</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </outboundProperties>
+      </transformer>
+      <responseTransformer version="3.9.0">
+        <elements/>
+        <inboundTemplate encoding="base64"></inboundTemplate>
+        <outboundTemplate encoding="base64"></outboundTemplate>
+        <inboundDataType>HL7V2</inboundDataType>
+        <outboundDataType>HL7V2</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </outboundProperties>
+      </responseTransformer>
+      <filter version="3.9.0">
+        <elements/>
+      </filter>
+      <transportName>File Writer</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+      <waitForPrevious>true</waitForPrevious>
+    </connector>
+  </destinationConnectors>
+  <preprocessingScript>// Modify the message variable below to pre process data
+return message;</preprocessingScript>
+  <postprocessingScript>// This script executes once after a message has been processed
+// Responses returned from here will be stored as &quot;Postprocessor&quot; in the response map
+return;</postprocessingScript>
+  <deployScript>// This script executes once when the channel is deployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</deployScript>
+  <undeployScript>// This script executes once when the channel is undeployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</undeployScript>
+  <properties version="3.9.0">
+    <clearGlobalChannelMap>true</clearGlobalChannelMap>
+    <messageStorageMode>DEVELOPMENT</messageStorageMode>
+    <encryptData>false</encryptData>
+    <removeContentOnCompletion>false</removeContentOnCompletion>
+    <removeOnlyFilteredOnCompletion>false</removeOnlyFilteredOnCompletion>
+    <removeAttachmentsOnCompletion>false</removeAttachmentsOnCompletion>
+    <initialState>STARTED</initialState>
+    <storeAttachments>true</storeAttachments>
+    <metaDataColumns>
+      <metaDataColumn>
+        <name>SOURCE</name>
+        <type>STRING</type>
+        <mappingName>mirth_source</mappingName>
+      </metaDataColumn>
+      <metaDataColumn>
+        <name>TYPE</name>
+        <type>STRING</type>
+        <mappingName>mirth_type</mappingName>
+      </metaDataColumn>
+    </metaDataColumns>
+    <attachmentProperties version="3.9.0">
+      <type>None</type>
+      <properties/>
+    </attachmentProperties>
+    <resourceIds class="linked-hash-map">
+      <entry>
+        <string>Default Resource</string>
+        <string>[Default Resource]</string>
+      </entry>
+    </resourceIds>
+  </properties>
+  <exportData>
+    <metadata>
+      <enabled>true</enabled>
+      <lastModified>
+        <time>1600245659004</time>
+        <timezone>Asia/Calcutta</timezone>
+      </lastModified>
+      <pruningSettings>
+        <archiveEnabled>true</archiveEnabled>
+      </pruningSettings>
+    </metadata>
+  </exportData>
+</channel>

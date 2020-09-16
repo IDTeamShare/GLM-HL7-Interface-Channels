@@ -1,0 +1,1020 @@
+<channel version="3.9.0">
+  <id>2a3987e6-89bc-4d43-a1ec-7be7c8f9d17b</id>
+  <nextMetaDataId>2</nextMetaDataId>
+  <name>Intergy_outbound_DFT_Gensys_Dev</name>
+  <description></description>
+  <revision>46</revision>
+  <sourceConnector version="3.9.0">
+    <metaDataId>0</metaDataId>
+    <name>sourceConnector</name>
+    <properties class="com.mirth.connect.connectors.jdbc.DatabaseReceiverProperties" version="3.9.0">
+      <pluginProperties/>
+      <pollConnectorProperties version="3.9.0">
+        <pollingType>INTERVAL</pollingType>
+        <pollOnStart>true</pollOnStart>
+        <pollingFrequency>300000</pollingFrequency>
+        <pollingHour>0</pollingHour>
+        <pollingMinute>0</pollingMinute>
+        <cronJobs/>
+        <pollConnectorPropertiesAdvanced>
+          <weekly>true</weekly>
+          <inactiveDays>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+            <boolean>false</boolean>
+          </inactiveDays>
+          <dayOfMonth>1</dayOfMonth>
+          <allDay>true</allDay>
+          <startingHour>8</startingHour>
+          <startingMinute>0</startingMinute>
+          <endingHour>17</endingHour>
+          <endingMinute>0</endingMinute>
+        </pollConnectorPropertiesAdvanced>
+      </pollConnectorProperties>
+      <sourceConnectorProperties version="3.9.0">
+        <responseVariable>None</responseVariable>
+        <respondAfterProcessing>true</respondAfterProcessing>
+        <processBatch>false</processBatch>
+        <firstResponse>false</firstResponse>
+        <processingThreads>1</processingThreads>
+        <resourceIds class="linked-hash-map">
+          <entry>
+            <string>Default Resource</string>
+            <string>[Default Resource]</string>
+          </entry>
+        </resourceIds>
+        <queueBufferSize>1000</queueBufferSize>
+      </sourceConnectorProperties>
+      <driver>net.sourceforge.jtds.jdbc.Driver</driver>
+      <url>jdbc:jtds:sqlserver://INFORMIXSERVER:1433/Gensys;instance=SQL2016</url>
+      <username>sa</username>
+      <password>Informix11@9</password>
+      <select>select CNAD.CaseNumberDFTDetailID,CNAD.CaseNumberDetailID,MessageControlID,REPLACE(MessageControlID,&apos;glm_&apos;,&apos;&apos;) AS MessageID,
+FORMAT(CNAD.CreatedDate,&apos;yyyyMMddhhmmss&apos;) AS CreatedDate,MessageStatus,CND.CaseNumber
+from CaseNumberDFTDetail CNAD INNER JOIN dbo.CaseNumberDetail CND ON CNAD.CaseNumberDetailID=CND.CaseNumberDetailID
+where MessageStatus = &apos;New&apos; AND CND.IsPrimarius=0
+order by CNAD.CreatedDate asc</select>
+      <update>Update CaseNumberDFTDetail
+set MessageStatus = &apos;Completed&apos;
+where CaseNumberDFTDetailID = ${casenumberdftdetailid}</update>
+      <useScript>false</useScript>
+      <aggregateResults>false</aggregateResults>
+      <cacheResults>true</cacheResults>
+      <keepConnectionOpen>true</keepConnectionOpen>
+      <updateMode>3</updateMode>
+      <retryCount>3</retryCount>
+      <retryInterval>10000</retryInterval>
+      <fetchSize>1000</fetchSize>
+      <encoding>DEFAULT_ENCODING</encoding>
+    </properties>
+    <transformer version="3.9.0">
+      <elements>
+        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+          <name>Call Stored procedure to fetch patient detials </name>
+          <sequenceNumber>0</sequenceNumber>
+          <enabled>true</enabled>
+          <script>//call storef procedure to get the patient and Insurance detail to create the ADT^A28 message
+importPackage(java.util);
+
+
+try
+{
+
+channelMap.put(&apos;key&apos;,&apos;value&apos;)
+
+var casenumber = msg[&apos;casenumberdetailid&apos;].toString();
+channelMap.put(&quot;CaseNumber&quot;,casenumber);
+logger.info(&quot;casenumber &quot;+ casenumber);
+
+var casenum = msg[&apos;casenumber&apos;].toString();
+channelMap.put(&quot;casenum&quot;,casenum);
+logger.info(&quot;casenum &quot;+ casenum);
+
+
+var msgCreatedDateTime = msg[&apos;createddate&apos;].toString()
+channelMap.put(&quot;msgCreatedDateTime&quot;,msgCreatedDateTime);
+logger.info(&quot;msgCreatedDateTime &quot;+ msgCreatedDateTime);
+
+var msgStatus = msg[&apos;messagestatus&apos;].toString()
+channelMap.put(&quot;msgStatus&quot;,msgStatus);
+logger.info(&quot;msgStatus &quot;+ msgStatus);
+
+var MessageControlID = msg[&apos;messagecontrolid&apos;].toString()
+channelMap.put(&quot;MessageControlID&quot;,MessageControlID);
+logger.info(&quot;MessageControlID &quot;+ MessageControlID);
+
+var MessageID = msg[&apos;messageid&apos;].toString()
+channelMap.put(&quot;MessageID&quot;,MessageID);
+logger.info(&quot;MessageID &quot;+ MessageID);
+
+var spResultSetList = new java.util.ArrayList();
+
+var InsuranceResultSetList = new java.util.ArrayList();
+
+var FinancialTransactionResultSetList = new java.util.ArrayList();
+
+//Database connection
+var dbConn = DatabaseConnectionFactory.createDatabaseConnection(&apos;net.sourceforge.jtds.jdbc.Driver&apos;,&apos;jdbc:jtds:sqlserver://INFORMIXSERVER:1433/Gensys;instance=SQL2016&apos;,&apos;sa&apos;,&apos;Informix11@9&apos;);
+
+	
+var PatientInfoSP = &quot;exec uspViewCaseNumberADTPatientDetail &apos;&quot;+casenumber+&quot;&apos;&quot;;
+logger.info(&quot;PatientInfoSP&quot;+ PatientInfoSP);
+
+var InsuranceInfoSP = &quot;exec uspViewCaseNumberADTInsuranceDetail &apos;&quot;+casenumber+&quot;&apos;&quot;;
+logger.info(&quot;InsuranceInfoSP&quot;+ InsuranceInfoSP);
+
+var ChargesInfoSP = &quot;exec uspViewCaseNumberTransactionDetail &apos;&quot;+casenumber+&quot;&apos;&quot;;
+logger.info(&quot;ChargesInfoSP&quot;+ ChargesInfoSP);
+
+var PatientInfoResultSet = dbConn.executeCachedQuery(PatientInfoSP);
+logger.info(&quot;PatientInfoResultSet&quot;+PatientInfoResultSet);
+channelMap.put(&quot;PatientInfoResultSet&quot;,PatientInfoResultSet);
+
+var InsuranceInfoResultSet = dbConn.executeCachedQuery(InsuranceInfoSP);
+logger.info(&quot;InsuranceInfoResultSet&quot;+InsuranceInfoResultSet);
+channelMap.put(&quot;InsuranceInfoResultSet&quot;,InsuranceInfoResultSet);
+
+var ChargesInfoResultSet = dbConn.executeCachedQuery(ChargesInfoSP);
+logger.info(&quot;ChargesInfoResultSet&quot;+ChargesInfoResultSet);
+channelMap.put(&quot;ChargesInfoResultSet&quot;,ChargesInfoResultSet);
+
+
+var PatientInfoResultSetLen = PatientInfoResultSet.size();
+channelMap.put(&apos;PatientInfoResultSetLen &apos;,PatientInfoResultSetLen);
+logger.info(&quot;PatientInfoResultSetLen  &quot;+PatientInfoResultSetLen );
+
+var InsuranceInfoResultSetLen = InsuranceInfoResultSet.size();
+channelMap.put(&apos;InsuranceInfoResultSetLen &apos;,InsuranceInfoResultSetLen);
+logger.info(&quot;InsuranceInfoResultSetLen  &quot;+InsuranceInfoResultSetLen );
+
+}
+
+catch(e)
+{
+	//log the error
+	logger.error($(&apos;Channel Name&apos;)+&quot; message error recorded because:&quot; + e);
+	//Throw the exception 
+}
+
+finally 
+{
+   if (dbConn) 
+   { 
+      dbConn.close();
+   }
+}</script>
+        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+      </elements>
+      <inboundTemplate encoding="base64">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8
+cmVzdWx0Pg0KICAgIDxjYXNlbnVtYmVyZGZ0ZGV0YWlsaWQ+dmFsdWU8L2Nhc2VudW1iZXJkZnRk
+ZXRhaWxpZD4NCiAgICA8Y2FzZW51bWJlcmRldGFpbGlkPnZhbHVlPC9jYXNlbnVtYmVyZGV0YWls
+aWQ+DQogICAgPG1lc3NhZ2Vjb250cm9saWQ+dmFsdWU8L21lc3NhZ2Vjb250cm9saWQ+DQogICAg
+PG1lc3NhZ2VpZD52YWx1ZTwvbWVzc2FnZWlkPg0KICAgIDxjcmVhdGVkZGF0ZT52YWx1ZTwvY3Jl
+YXRlZGRhdGU+DQogICAgPG1lc3NhZ2VzdGF0dXM+dmFsdWU8L21lc3NhZ2VzdGF0dXM+DQogICAg
+PGNhc2VudW1iZXI+dmFsdWU8L2Nhc2VudW1iZXI+DQo8L3Jlc3VsdD4NCg==</inboundTemplate>
+      <outboundTemplate encoding="base64">TVNIfF5+XCZ8UmVtb3RlQXBwfFJlbW90ZUlEfEludGVyZ3lBcHB8SW50ZXJneUlEfDIwMDcxMTA1
+MTAyMTMzfHxBRFReQTI4fDE3ODU5fFB8Mi4zfCAKRVZOfEEyOHwyMDA3MTEwNTEwMjEzMwpQSUR8
+fHwxMzB8fENhcmxzb25eU3VzYW5eQW5ufHwxOTQxMTIyNTAzMTItNTAwMHxGfHxDfDE1MjAyIFNv
+dXRoIFdlc3QgMjJuZCBBdmVudWVeQXB0LiAyOV5NYWRpc29udmlsbGVeQ0FeOTU2NTMtMTA5NF5V
+U3x8KDUzMCkgMjM0LSA0MDQ5XlBSTl5QSF5zdXNhbm5lLmNhcmxzb25AZW1haWwuY29tXl41MzBe
+MjM0NDA0OX4oNTMwKSAyMzQtMjAwMV5PUk5eQ1BeXl41MzBeMjM0MjAwMXwoOTE2KSA1NTUtNTk4
+MVgxMjM0Xl5eXl45MTZeNTU1NTk4MV4xMjM0fGVuXkVuZ2xpc2heSVNPNjM5fE18fHw4MzgzNDg0
+ODJ8fHxIfHx8fHx8fHxOClBWMXx8T3x8fHx8REVOXk5vcnRod29vZF5EZW5uaXNeRXZhbl5NRHwz
+Nl5Gb3JkXkRhdmlkXkVeTUR8fHx8fHx8fHx8fHxTVEFORHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8
+fDIwMDcxMTA1CkdUMXwxfDEwNXxDYXJsc29uXlN0ZXBoZW5eTWFya15Kci58fDE1MjAyIFNvdXRo
+IFdlc3QgMjJuZCBBdmVudWVeQXB0LiAyOV5NYWRpc29udmlsbGVeQ0FeOTU2NTMtMTA5NF5VU3wo
+NTMwKSA0MzAtMjMyMl5eXlN0ZXZlbmNhcmxzb25qckBlbWFpbGNpdHkuY29tXl41MzBeNDMwMjMy
+MnwoNTMwKSA0MzQtIDMyMzJYNDReXl5eXjUzMF40MzQzMjMyXjQ0fDE5NDAxMjI1fE18fEh8MjM0
+ODkxMDEwfHx8fEJlbGwgTGFic3wzNzQgU291dGggR3JhbmdlIFN0cmVldF5eTWFkaXNvbl5DQV45
+NTY1M3woOTE2KSA1NTUtIDU5ODFeXl5eXjkxNl41NTU1OTgxfEJMNDkwMDIyfEV8fHx8fHx8fHx8
+fHx8fHx8ZW5eRW5nbGlzaF5JU082Mzl8fHx8fHx8fHx8fHx8fHx8fHx8CklOMXwxfEJDQlMwMXxC
+Q0JTfEJsdWUgQ3Jvc3MgLyBCbHVlIFNoaWVsZHw0MzUgRW1iYXJjYWRlcm9eXk1hZGlzb25eQ0Fe
+OTU2NTN8fCg5MTYpIDU1NS0gNzY4OXw4ODV8QmVsbCBMYWJzfHx8MjAwNzAxMDF8MjAwODAxMDF8
+fHxDYXJsc29uXlN0ZXBoZW5eTWFya15Kci58SHwxOTQwMTIyNXwxNTIwMiBTb3V0aCBXZXN0IDIy
+bmQgQXZlbnVlXkFwdC4gMjleTWFkaXNvbnZpbGxlXkNBXjk1NjUzLSAxMDk0XlVTfFl8fHx8fHx8
+fHx8fHx8fHxCQ0JTMDF8Y21pNDg5MjJ6MzkzOWJsfDUwMHx8fHx8RXxNfHx8fHx8MTA1Cg==</outboundTemplate>
+      <inboundDataType>XML</inboundDataType>
+      <outboundDataType>HL7V2</outboundDataType>
+      <inboundProperties class="com.mirth.connect.plugins.datatypes.xml.XMLDataTypeProperties" version="3.9.0">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.xml.XMLSerializationProperties" version="3.9.0">
+          <stripNamespaces>false</stripNamespaces>
+        </serializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.xml.XMLBatchProperties" version="3.9.0">
+          <splitType>Element_Name</splitType>
+          <elementName></elementName>
+          <level>1</level>
+          <query></query>
+          <batchScript></batchScript>
+        </batchProperties>
+      </inboundProperties>
+      <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+          <handleRepetitions>true</handleRepetitions>
+          <handleSubcomponents>true</handleSubcomponents>
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <stripNamespaces>true</stripNamespaces>
+          <segmentDelimiter>\r</segmentDelimiter>
+          <convertLineBreaks>true</convertLineBreaks>
+        </serializationProperties>
+        <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <segmentDelimiter>\r</segmentDelimiter>
+        </deserializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+          <splitType>MSH_Segment</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+        <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+          <segmentDelimiter>\r</segmentDelimiter>
+          <successfulACKCode>AA</successfulACKCode>
+          <successfulACKMessage></successfulACKMessage>
+          <errorACKCode>AE</errorACKCode>
+          <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+          <rejectedACKCode>AR</rejectedACKCode>
+          <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+          <msh15ACKAccept>false</msh15ACKAccept>
+          <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+        </responseGenerationProperties>
+        <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+          <successfulACKCode>AA,CA</successfulACKCode>
+          <errorACKCode>AE,CE</errorACKCode>
+          <rejectedACKCode>AR,CR</rejectedACKCode>
+          <validateMessageControlId>true</validateMessageControlId>
+          <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+          <originalIdMapVariable></originalIdMapVariable>
+        </responseValidationProperties>
+      </outboundProperties>
+    </transformer>
+    <filter version="3.9.0">
+      <elements/>
+    </filter>
+    <transportName>Database Reader</transportName>
+    <mode>SOURCE</mode>
+    <enabled>true</enabled>
+    <waitForPrevious>true</waitForPrevious>
+  </sourceConnector>
+  <destinationConnectors>
+    <connector version="3.9.0">
+      <metaDataId>1</metaDataId>
+      <name>Destination 1</name>
+      <properties class="com.mirth.connect.connectors.file.FileDispatcherProperties" version="3.9.0">
+        <pluginProperties/>
+        <destinationConnectorProperties version="3.9.0">
+          <queueEnabled>false</queueEnabled>
+          <sendFirst>false</sendFirst>
+          <retryIntervalMillis>10000</retryIntervalMillis>
+          <regenerateTemplate>false</regenerateTemplate>
+          <retryCount>0</retryCount>
+          <rotate>false</rotate>
+          <includeFilterTransformer>false</includeFilterTransformer>
+          <threadCount>1</threadCount>
+          <threadAssignmentVariable></threadAssignmentVariable>
+          <validateResponse>false</validateResponse>
+          <resourceIds class="linked-hash-map">
+            <entry>
+              <string>Default Resource</string>
+              <string>[Default Resource]</string>
+            </entry>
+          </resourceIds>
+          <queueBufferSize>1000</queueBufferSize>
+          <reattachAttachments>true</reattachAttachments>
+        </destinationConnectorProperties>
+        <scheme>FILE</scheme>
+        <host>E:/Mirthtest/DFT/</host>
+        <outputPattern>${MessageID}_${casenum}.txt</outputPattern>
+        <anonymous>true</anonymous>
+        <username>anonymous</username>
+        <password>anonymous</password>
+        <timeout>10000</timeout>
+        <keepConnectionOpen>true</keepConnectionOpen>
+        <maxIdleTime>0</maxIdleTime>
+        <secure>true</secure>
+        <passive>true</passive>
+        <validateConnection>true</validateConnection>
+        <outputAppend>true</outputAppend>
+        <errorOnExists>false</errorOnExists>
+        <temporary>false</temporary>
+        <binary>false</binary>
+        <charsetEncoding>DEFAULT_ENCODING</charsetEncoding>
+        <template>${message.encodedData}</template>
+      </properties>
+      <transformer version="3.9.0">
+        <elements>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Construct MSH Segment</name>
+            <sequenceNumber>0</sequenceNumber>
+            <enabled>true</enabled>
+            <script>//Construct the MSH Segment
+
+
+
+//Check whether mesasage is new or update
+
+var MsgType = &apos;DFT^P03&apos;;
+
+
+
+ //var ConvertedDate = DateUtil.convertDate(&apos;yyyy-MM-dd HH:mm:ss&apos;, &apos;yyyyMMddHHmmss&apos;,$(&apos;msgCreatedDateTime&apos;));
+ //channelMap.put(&apos;ConvertedDate&apos;, ConvertedDate);
+
+tmp[&apos;MSH&apos;][&apos;MSH.3&apos;] = &quot;GenSys&quot;;
+tmp[&apos;MSH&apos;][&apos;MSH.4&apos;] = &quot;CUSTOMLIS&quot;;
+tmp[&apos;MSH&apos;][&apos;MSH.5&apos;] = &quot;INTERGY&quot;;
+tmp[&apos;MSH&apos;][&apos;MSH.6&apos;] = &quot;GLM&quot;;
+tmp[&apos;MSH&apos;][&apos;MSH.7&apos;] = $(&apos;msgCreatedDateTime&apos;);
+
+
+
+tmp[&apos;MSH&apos;][&apos;MSH.9&apos;] = MsgType;
+
+
+tmp[&apos;MSH&apos;][&apos;MSH.10&apos;] = $(&apos;MessageControlID&apos;);
+
+
+
+tmp[&apos;MSH&apos;][&apos;MSH.11&apos;] = &quot;T&quot;;
+
+tmp[&apos;MSH&apos;][&apos;MSH.12&apos;] = &quot;2.3&quot;;
+
+
+tmp[&apos;MSH&apos;][&apos;MSH.13&apos;] = &apos;&apos;;
+
+tmp[&apos;MSH&apos;][&apos;MSH.14&apos;] = &apos;&apos;;
+
+tmp[&apos;MSH&apos;][&apos;MSH.15&apos;] = &apos;&apos;;
+
+//tmp[&apos;MSH&apos;] = SerializerFactory.getSerializer(&apos;HL7V2&apos;).fromXML(tmp[&apos;MSH&apos;]);
+
+logger.info(&quot;MSH Segment &quot; + tmp[&apos;MSH&apos;].toString());
+
+channelMap.put(&apos;MSH Segment&apos;,tmp[&apos;MSH&apos;]);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Construct EVN Segment</name>
+            <sequenceNumber>1</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// EVN Segment
+
+var MsgType = &apos;DFT^P03&apos;;
+
+tmp[&apos;EVN&apos;][&apos;EVN.1&apos;][&apos;EVN.1.1&apos;] = MsgType;
+
+tmp[&apos;EVN&apos;][&apos;EVN.2&apos;][&apos;EVN.2.1&apos;] = $(&apos;msgCreatedDateTime&apos;)
+
+logger.info(&quot;EVN Segment &quot; + tmp[&apos;EVN&apos;].toString());
+
+channelMap.put(&apos;EVN&apos;,tmp[&apos;EVN&apos;]);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Construct PID and PV1 segment </name>
+            <sequenceNumber>2</sequenceNumber>
+            <enabled>true</enabled>
+            <script>//import java packages 
+importPackage(java.util);
+
+var PaitentInfoList = new java.util.ArrayList();
+
+var PatientVisitInfoList = new java.util.ArrayList();
+
+var patientInfoResultSet = $(&apos;PatientInfoResultSet&apos;);
+
+var accidentData = &apos;&apos;;
+
+
+
+//spResultSetList.add(ResultSetFromStoredProcedure.getString(40));
+
+// Loop the database object 
+while(patientInfoResultSet.next())
+{
+
+     tmp[&apos;PID&apos;][&apos;PID.3&apos;][&apos;PID.3.1&apos;] = patientInfoResultSet.getString(&quot;PatientID&quot;);
+   
+//Patient Family Name AKA  lastname
+tmp[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.1&apos;] = patientInfoResultSet.getString(&quot;PatientLastName&quot;);
+
+//patient Given Name AKA LAstname
+tmp[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.2&apos;] = patientInfoResultSet.getString(&quot;PatientFirstName&quot;);
+
+//patient Middle Name 
+tmp[&apos;PID&apos;][&apos;PID.5&apos;][&apos;PID.5.3&apos;] = patientInfoResultSet.getString(&quot;PatientMiddleName&quot;);
+
+//DOB
+tmp[&apos;PID&apos;][&apos;PID.7&apos;] =  patientInfoResultSet.getString(&quot;PatientDOB&quot;);
+
+//Sex
+tmp[&apos;PID&apos;][&apos;PID.8&apos;] = patientInfoResultSet.getString(&quot;PatientGender&quot;);
+
+//Race
+tmp[&apos;PID&apos;][&apos;PID.10&apos;] = patientInfoResultSet.getString(&quot;PatientRace&quot;);
+
+//Street Address
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.1&apos;] =  patientInfoResultSet.getString(&quot;PatientAddressLine1&quot;) + &quot; &quot; + patientInfoResultSet.getString(&quot;PatientAddressLine2&quot;);
+
+//Other Designation
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.2&apos;] = &quot;&quot;;
+
+//City
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.3&apos;] =  patientInfoResultSet.getString(&quot;PatientCity&quot;);
+
+//State
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.4&apos;] =  patientInfoResultSet.getString(&quot;PatientState&quot;);
+
+//ZIP CODE
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.5&apos;] =  patientInfoResultSet.getString(&quot;PatientZipCode&quot;);
+
+//Country
+tmp[&apos;PID&apos;][&apos;PID.11&apos;][&apos;PID.11.6&apos;] =   patientInfoResultSet.getString(&quot;PatientCountry&quot;);
+
+tmp[&apos;PID&apos;][&apos;PID.12&apos;] = &quot;&quot;;
+
+
+//Phone Number HOME 
+tmp[&apos;PID&apos;][&apos;PID.13&apos;] = patientInfoResultSet.getString(&quot;PatientHomePhone&quot;);
+
+//Cellphone	
+tmp[&apos;PID&apos;][&apos;PID.14&apos;] = patientInfoResultSet.getString(&quot;PatientCellPhone&quot;);
+
+//
+tmp[&apos;PID&apos;][&apos;PID.15&apos;] = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.16&apos;]  = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.17&apos;] = &quot;&quot;;
+
+//Account Number
+tmp[&apos;PID&apos;][&apos;PID.18&apos;] = &quot;&quot;;
+
+//SSN number
+tmp[&apos;PID&apos;][&apos;PID.19&apos;]  =  patientInfoResultSet.getString(&quot;PatientSSN&quot;);
+
+
+tmp[&apos;PID&apos;][&apos;PID.20&apos;] = &quot;&quot;;
+
+
+tmp[&apos;PID&apos;][&apos;PID.21&apos;] = &quot;&quot;;
+
+//Ethinic city
+tmp[&apos;PID&apos;][&apos;PID.22&apos;]  = patientInfoResultSet.getString(&quot;PatientEthnicity&quot;);
+
+tmp[&apos;PID&apos;][&apos;PID.23&apos;]  = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.24&apos;] = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.25&apos;] = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.26&apos;] = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.27&apos;] = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.28&apos;] = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.29&apos;] = &quot;&quot;;
+
+tmp[&apos;PID&apos;][&apos;PID.30&apos;] =  &quot;&quot;;
+
+//tmp[&apos;PID&apos;] = SerializerFactory.getSerializer(&apos;HL7V2&apos;).fromXML(tmp[&apos;PID&apos;]);
+
+
+// END of PID segment 
+
+
+//PV1 segment starts shere 
+tmp[&apos;PV1&apos;][&apos;PV1.1&apos;][&apos;PV1.1.1&apos;] = &apos;1&apos;;
+
+//Patient Class
+tmp[&apos;PV1&apos;][&apos;PV1.2&apos;] = patientInfoResultSet.getString(&quot;PatientClass&quot;);
+
+
+tmp[&apos;PV1&apos;][&apos;PV1.3&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.4&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.5&apos;]  = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.6&apos;] = &quot;&quot;;
+
+
+//Attending Doctor
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.1&apos;] = patientInfoResultSet.getString(&quot;ProviderNPI&quot;) ;
+//
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.2&apos;] = patientInfoResultSet.getString(&quot;ProviderLastName&quot;);
+
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.3&apos;] =  patientInfoResultSet.getString(&quot;ProviderFirstName&quot;);
+
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.4&apos;] =  patientInfoResultSet.getString(&quot;ProviderMiddleName&quot;);
+
+tmp[&apos;PV1&apos;][&apos;PV1.7&apos;][&apos;PV1.7.5&apos;] =  &quot;&quot;;
+
+
+//Reffering Doctor
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.1&apos;] = patientInfoResultSet.getString(&quot;ReferringProviderNPI&quot;);
+//family name AKA lastname
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.2&apos;] =  patientInfoResultSet.getString(&quot;ReferringProviderLastName&quot;);
+
+//Give name AKA First NAme
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.3&apos;]  =patientInfoResultSet.getString(&quot;ReferringProviderFirstName&quot;);
+
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.4&apos;] = patientInfoResultSet.getString(&quot;ReferringProviderMiddleName&quot;);
+tmp[&apos;PV1&apos;][&apos;PV1.8&apos;][&apos;PV1.8.5&apos;] = &quot;&quot;;
+
+// Patient Financial Clas
+tmp[&apos;PV1&apos;][&apos;PV1.20&apos;][&apos;PV1.20.1&apos;]  = patientInfoResultSet.getString(&quot;FinancialClass&quot;);
+
+//Consulting Odctor
+tmp[&apos;PV1&apos;][&apos;PV1.9&apos;]  = &quot;&quot;;
+
+
+tmp[&apos;PV1&apos;][&apos;PV1.10&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.11&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.12&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.13&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.14&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.15&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.16&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.17&apos;] = &quot;&quot;;
+
+tmp[&apos;PV1&apos;][&apos;PV1.18&apos;] = &quot;&quot;;
+
+// PV1 Segment ends here 
+
+
+// use this accident data later for the ACC segment 
+accidentData = patientInfoResultSet.getString(&quot;AccidentDate&quot;);
+
+}
+
+channelMap.put(&quot;PaitentInfoList&quot;,PaitentInfoList);
+channelMap.put(&quot;accidentData&quot;,accidentData);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Fetch FT1 and PR1 Result set</name>
+            <sequenceNumber>3</sequenceNumber>
+            <enabled>true</enabled>
+            <script>var chargeResultSet =   $(&apos;ChargesInfoResultSet&apos;);
+
+var chargeResutSetLen = chargeResultSet.size();
+channelMap.put(&apos;chargeResutSetLen&apos;,chargeResutSetLen);
+
+//Delete the template reffrence
+delete tmp[&apos;FT1&apos;];
+delete tmp[&apos;PR1&apos;];
+
+//FT1 and PR1 mapping starts here 
+var i = 1;
+
+while(chargeResultSet.next())
+{
+	logger.info(&quot;Inside the while loop of &quot;+&quot;&quot;);
+	     
+     var FT1Segment = new XML(&quot;&lt;FT1&gt;&lt;/FT1&gt;&quot;);
+     FT1Segment[&apos;FT1.1&apos;][&apos;FT1.1.1&apos;] = i;
+	
+	
+	FT1Segment[&apos;FT1.2&apos;][&apos;FT1.2.1&apos;] = &quot;&quot;;
+	
+	FT1Segment[&apos;FT1.4&apos;][&apos;FT1.4.1&apos;] = chargeResultSet.getString(&quot;TransactionDate&quot;);
+
+	FT1Segment[&apos;FT1.6&apos;][&apos;FT1.6.1&apos;] =  chargeResultSet.getString(&quot;TransactionType&quot;);
+
+	FT1Segment[&apos;FT1.7&apos;][&apos;FT1.7.1&apos;] =  chargeResultSet.getString(&quot;TransactionCode&quot;);
+
+	FT1Segment[&apos;FT1.10&apos;][&apos;FT1.10.1&apos;]  = chargeResultSet.getString(&quot;TransactionQuantity&quot;);
+
+	FT1Segment[&apos;FT1.13&apos;][&apos;FT1.13.1&apos;] = chargeResultSet.getString(&quot;DepartmentCode&quot;);
+
+	FT1Segment[&apos;FT1.16&apos;][&apos;FT1.16.1&apos;] = chargeResultSet.getString(&quot;AssignedPatientLocation&quot;);
+
+     
+	//var GDCodes = chargeResultSet.getString(&quot;DiagnosisCode&quot;);
+
+	var testGDCodes = chargeResultSet.getClob(&quot;DiagnosisCode&quot;);
+     var GDCodes =  testGDCodes.getSubString(1,testGDCodes.length());     
+     //Regualr removespace and ; with ~
+     var TempStringWithOutSpace = GDCodes.replace(&quot; &quot;, &quot;&quot;);
+     var TempStringWithOutSemiColon = TempStringWithOutSpace.replace(&apos;;&apos;,&apos;~&apos;);
+     var DiagnosisCode = TempStringWithOutSemiColon;
+	channelMap.put(&quot;GDCodes&quot;,GDCodes);
+		channelMap.put(&quot;DiagnosisCode&quot;,DiagnosisCode);
+
+	FT1Segment[&apos;FT1.19&apos;][&apos;FT1.19.1&apos;] = DiagnosisCode;
+
+     //  FT1Segment[&apos;FT1.19&apos;][&apos;FT1.19.1&apos;] = &quot;A028&quot;;
+	
+
+     
+     
+     tmp.appendChild(FT1Segment);
+     logger.info(&quot;Contructed FT1 Segment&quot;+&quot;&quot;);
+     
+	var PR1Segment = new XML(&quot;&lt;PR1&gt;&lt;/PR1&gt;&quot;);
+	 
+     PR1Segment[&apos;PR1.1&apos;][&apos;PR1.1.1&apos;] = 1;
+     
+     PR1Segment[&apos;PR1.2&apos;][&apos;PR1.2.1&apos;] = chargeResultSet.getString(&quot;ProcedureCodingMethod&quot;);
+     
+     PR1Segment[&apos;PR1.3&apos;][&apos;PR1.3.1&apos;] = chargeResultSet.getString(&quot;ProcedureCode&quot;);
+     
+     PR1Segment[&apos;PR1.5&apos;][&apos;PR1.5.1&apos;] = chargeResultSet.getString(&quot;ProcedureDateTime&quot;);
+      
+     PR1Segment[&apos;PR1.6&apos;][&apos;PR1.6.1&apos;] = chargeResultSet.getString(&quot;ProcedureFunctionType&quot;);
+     
+     
+
+      tmp.appendChild(PR1Segment);
+      logger.info(&quot;PR1 Segment Constructed &quot;+&quot;&quot;);
+           
+     i++;
+	
+	
+}
+
+
+
+
+logger.info(&quot;came out of the While Loop Ft1 and IN1 segment&quot;+&quot;&quot;);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Construct GT1 and IN1  Segment</name>
+            <sequenceNumber>4</sequenceNumber>
+            <enabled>true</enabled>
+            <script>//Construct GT1 and IN1 Segments here 
+
+
+var NoOfRowsInsuranceAndGurantor = $(&apos;InsuranceInfoResultSetLen &apos;);
+
+var insuranceAndGuranctorResultSet = $(&apos;InsuranceInfoResultSet&apos;);
+
+delete tmp[&apos;GT1&apos;];
+delete tmp[&apos;IN1&apos;];
+
+
+
+var i = 1;
+
+while(insuranceAndGuranctorResultSet.next())
+{
+     
+     var GT1Segment = new XML(&quot;&lt;GT1&gt;&lt;/GT1&gt;&quot;);
+
+         
+	GT1Segment[&apos;GT1.1&apos;][&apos;GT1.1.1&apos;] = i;
+	
+	//GurantorNUmber
+	GT1Segment[&apos;GT1.2&apos;][&apos;GT1.2.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;GuarantorNumber&quot;);
+	//G NAme
+	//Fname
+	GT1Segment[&apos;GT1.3&apos;][&apos;GT1.3.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;GuarantorLastName&quot;);
+	
+	//GivenName
+	GT1Segment[&apos;GT1.3&apos;][&apos;GT1.3.2&apos;] =  insuranceAndGuranctorResultSet.getString(&quot;GuarantorFirstName&quot;);
+	//MiddleName
+	GT1Segment[&apos;GT1.3&apos;][&apos;GT1.3.3&apos;] =  &quot;&quot;;
+	//Suffix
+	GT1Segment[&apos;GT1.3&apos;][&apos;GT1.3.4&apos;] =  &quot;&quot;;
+
+	//GDOB
+	GT1Segment[&apos;GT1.8&apos;][&apos;GT1.8.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;GuarantorDOB&quot;);
+
+	// G Sex
+	GT1Segment[&apos;GT1.9&apos;][&apos;GT1.9.1&apos;] =  insuranceAndGuranctorResultSet.getString(&quot;GuarantorGender&quot;);
+
+	//g Relationship
+	GT1Segment[&apos;GT1.11&apos;][&apos;GT1.11.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;GuarantorRelationship&quot;);
+
+	//G SSN
+	GT1Segment[&apos;GT1.12&apos;][&apos;GT1.12.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;GuarantorSSN&quot;);
+         
+		
+	i++;
+	
+	//tmp.insertChildAfter(tmp.*[4+i], GT1Segment);
+	tmp.appendChild(GT1Segment);
+ 
+	
+}
+
+//Traverese the result again to fetch the insurance detials 
+insuranceAndGuranctorResultSet.beforeFirst();
+
+
+
+var j = 1;
+while(insuranceAndGuranctorResultSet.next())
+{
+
+	var IN1Segment = new XML(&quot;&lt;IN1&gt;&lt;/IN1&gt;&quot;);
+	logger.info(&quot;Insdie the insurance loop&quot; + &quot;&quot;);
+     	 
+	IN1Segment[&apos;IN1.1&apos;][&apos;IN1.1.1&apos;] = j;
+     // Insurance Plan ID
+	IN1Segment[&apos;IN1.2&apos;][&apos;IN1.2.1&apos;]  = insuranceAndGuranctorResultSet.getString(&quot;InsurancePlanID&quot;);
+	//Insurance Comapny ID
+	IN1Segment[&apos;IN1.3&apos;][&apos;IN1.3.1&apos;] =  insuranceAndGuranctorResultSet.getString(&quot;InsuranceCompanyID&quot;);
+	//insurance company Name
+     IN1Segment[&apos;IN1.4&apos;][&apos;IN1.4.1&apos;]  = insuranceAndGuranctorResultSet.getString(&quot;InsuranceCompanyName&quot;);
+
+     //inurance Company Address 
+     IN1Segment[&apos;IN1.5&apos;][&apos;IN1.5.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;InsuranceAddressLine1&quot;);
+     // Other designation
+     IN1Segment[&apos;IN1.5&apos;][&apos;IN1.5.2&apos;] =  insuranceAndGuranctorResultSet.getString(&quot;InsuranceAddressLine2&quot;);
+     // City Name
+     IN1Segment[&apos;IN1.5&apos;][&apos;IN1.5.3&apos;] =  insuranceAndGuranctorResultSet.getString(&quot;InsuranceCityName&quot;);
+     // State name
+     IN1Segment[&apos;IN1.5&apos;][&apos;IN1.5.4&apos;]  = insuranceAndGuranctorResultSet.getString(&quot;InsuranceStateName&quot;);
+     //Zip Code
+     IN1Segment[&apos;IN1.5&apos;][&apos;IN1.5.5&apos;] =  insuranceAndGuranctorResultSet.getString(&quot;InsuranceZipCode&quot;);
+     
+     // Group Number
+     IN1Segment[&apos;IN1.8&apos;][&apos;IN1.8.1&apos;] =  insuranceAndGuranctorResultSet.getString(&quot;GroupNumber&quot;);
+     // Insured Name
+     IN1Segment[&apos;IN1.16&apos;][&apos;IN1.16.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;InsuredName&quot;);
+     IN1Segment[&apos;IN1.16&apos;][&apos;IN1.16.2&apos;] = &quot;&quot;;
+     IN1Segment[&apos;IN1.16&apos;][&apos;IN1.16.3&apos;] = &quot;&quot;;
+     IN1Segment[&apos;IN1.16&apos;][&apos;IN1.16.4&apos;] = &quot;&quot;;
+
+     // Subscriber RelationShip
+     IN1Segment[&apos;IN1.17&apos;][&apos;IN1.17.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;SubscriberRelationship&quot;);
+     //INsured DOb
+     IN1Segment[&apos;IN1.18&apos;][&apos;IN1.18.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;InsuredDOB&quot;);
+
+
+     //Policy Number
+      IN1Segment[&apos;IN1.36&apos;][&apos;IN1.36.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;PolicyNumber&quot;);
+
+     //Insurace ID number
+     IN1Segment[&apos;IN1.49&apos;][&apos;IN1.49.1&apos;] = insuranceAndGuranctorResultSet.getString(&quot;InsuredIDNumber&quot;);
+
+     tmp.appendChild(IN1Segment);
+
+     j++;
+     
+}
+
+var GT1SegmentHL7  = SerializerFactory.getSerializer(&apos;HL7V2&apos;).fromXML(tmp);
+
+channelMap.put(&quot;GT1 segment HL7&quot;, GT1SegmentHL7);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.9.0">
+            <name>Construct ACC segment</name>
+            <sequenceNumber>5</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// attach the ACC semgent at last 
+
+
+delete tmp[&apos;ACC&apos;];
+var accSegment = new XML(&quot;&lt;ACC&gt;&lt;/ACC&gt;&quot;);
+accSegment[&apos;ACC.1&apos;][&apos;ACC.1.1&apos;] = $(&apos;accidentData&apos;);
+
+tmp.appendChild(accSegment);
+
+channelMap.put(&apos;accSegment&apos;,accSegment);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        </elements>
+        <inboundTemplate encoding="base64"></inboundTemplate>
+        <outboundTemplate encoding="base64">TVNIfF5+XCZ8fApFVk58fApQSUR8fApQVjF8fApGVDF8fHx8fHx8ClBSMXx8fHwKUk9MfDF8TEl8
+U3VwZXJ2aXNvcnxSYW5nd2FeQW5pcyBSYW5nd2FsYQpHVDF8fHx8fHx8fHx8fHx8fHx8fHx8fHx8
+CklOMXx8CkFDQ3x8Cg==</outboundTemplate>
+        <inboundDataType>HL7V2</inboundDataType>
+        <outboundDataType>HL7V2</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </outboundProperties>
+      </transformer>
+      <responseTransformer version="3.9.0">
+        <elements/>
+        <inboundDataType>HL7V2</inboundDataType>
+        <outboundDataType>HL7V2</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.9.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.9.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.9.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.9.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.9.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.9.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </outboundProperties>
+      </responseTransformer>
+      <filter version="3.9.0">
+        <elements/>
+      </filter>
+      <transportName>File Writer</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+      <waitForPrevious>true</waitForPrevious>
+    </connector>
+  </destinationConnectors>
+  <preprocessingScript>// Modify the message variable below to pre process data
+return message;</preprocessingScript>
+  <postprocessingScript>// This script executes once after a message has been processed
+// Responses returned from here will be stored as &quot;Postprocessor&quot; in the response map
+return;</postprocessingScript>
+  <deployScript>// This script executes once when the channel is deployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</deployScript>
+  <undeployScript>// This script executes once when the channel is undeployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</undeployScript>
+  <properties version="3.9.0">
+    <clearGlobalChannelMap>false</clearGlobalChannelMap>
+    <messageStorageMode>DEVELOPMENT</messageStorageMode>
+    <encryptData>false</encryptData>
+    <removeContentOnCompletion>false</removeContentOnCompletion>
+    <removeOnlyFilteredOnCompletion>false</removeOnlyFilteredOnCompletion>
+    <removeAttachmentsOnCompletion>false</removeAttachmentsOnCompletion>
+    <initialState>STARTED</initialState>
+    <storeAttachments>true</storeAttachments>
+    <metaDataColumns>
+      <metaDataColumn>
+        <name>SOURCE</name>
+        <type>STRING</type>
+        <mappingName>mirth_source</mappingName>
+      </metaDataColumn>
+      <metaDataColumn>
+        <name>TYPE</name>
+        <type>STRING</type>
+        <mappingName>mirth_type</mappingName>
+      </metaDataColumn>
+    </metaDataColumns>
+    <attachmentProperties version="3.9.0">
+      <type>None</type>
+      <properties/>
+    </attachmentProperties>
+    <resourceIds class="linked-hash-map">
+      <entry>
+        <string>Default Resource</string>
+        <string>[Default Resource]</string>
+      </entry>
+    </resourceIds>
+  </properties>
+  <exportData>
+    <metadata>
+      <enabled>false</enabled>
+      <lastModified>
+        <time>1600231619321</time>
+        <timezone>Asia/Calcutta</timezone>
+      </lastModified>
+      <pruningSettings>
+        <archiveEnabled>true</archiveEnabled>
+      </pruningSettings>
+    </metadata>
+  </exportData>
+</channel>
